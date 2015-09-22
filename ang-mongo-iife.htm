@@ -158,20 +158,23 @@
     (function () {
         'use strict';
 
-        angular.module('app', []);
+        angular
+			.module('app', []);
 
-        angular.module('app')
-                .run(myConfig);
+        angular
+			.module('app')
+            .run(myConfig);
 
         function myConfig($rootScope) {
             $rootScope.myConfig = {
-                heroku: 'http://coolworld.herokuapp.com/',
+                heroku: 'http://coolworld2015a1.herokuapp.com/',
                 local: 'http://localhost:3000/'
             }
         }
 
-        angular.module('app')
-                .controller('myCtrl', myCtrl);
+        angular
+			.module('app')
+            .controller('myCtrl', myCtrl);
 
         myCtrl.$inject = ['$http', '$rootScope', '$filter'];
 
