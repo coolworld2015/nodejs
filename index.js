@@ -12,17 +12,7 @@ app.get('/', function (req, res) {
     res.send('It is just API Server...');
 });
 
-app.get('/styles.css', function (req, res) {
-    res.sendFile(__dirname + '/build/styles.css');
-});
-
-app.get('/app.js', function (req, res) {
-    res.sendFile(__dirname + '/build/app.js');
-});
-
-app.get('/templates.js', function (req, res) {
-    res.sendFile(__dirname + '/build/templates.js');
-});
+app.use(express.static(__dirname + '/build'));
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
