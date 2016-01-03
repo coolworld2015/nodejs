@@ -25,7 +25,7 @@
 
         function myConfig($rootScope) {
             $rootScope.myConfig = {
-                heroku: 'http://coolworld.herokuapp.com/',
+                heroku: 'http://coolworld2015c1.herokuapp.com/',
                 local: 'http://localhost:3000/'
             }
 			var mode = localStorage.getItem('warehouse_mode');
@@ -81,7 +81,30 @@
                             }
                         }
                     })
-
+					
+                    .state('root.collection', {
+                        url: '/collection',
+                        views: {
+                            'display': {
+                                template: '<div><center>' +
+                                '<table border=1>' +
+                                '<tr ng-repeat="item in usersCtrl.items">' +
+                                '<td><img ng-src={{usersCtrl.collection}}{{item.pic}} style="width:100px; height:80px;"></td>' +
+                                '<td>{{item.id}}</td>' +
+                                '<td>{{item.name}}</td>' +
+                                '<td>{{usersCtrl.collection}}{{item.pic}}</td>' +
+                                '</tr>' +
+                                '</table>' +
+                                '</div>',
+                                resolve: {
+                                    results: resolveResource('api/test/get')
+                                },
+                                controller: 'UsersCtrl',
+                                controllerAs: 'usersCtrl'
+                            }
+                        }
+                    })
+					
                     .state('root.clients', {
                         url: '/clients',
                         views: {
@@ -98,8 +121,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/clients/get'),
-                                    goods: resolveResource('http://coolworld.herokuapp.com/api/goods/get')
+                                    results: resolveResource('api/clients/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -123,7 +145,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/goods/get')
+                                    results: resolveResource('api/goods/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -147,7 +169,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/inputs/get')
+                                    results: resolveResource('api/inputs/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -171,7 +193,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/invoicein/get')
+                                    results: resolveResource('api/invoicein/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -195,7 +217,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/outputs/get')
+                                    results: resolveResource('api/outputs/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -219,7 +241,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/invoiceout/get')
+                                    results: resolveResource('api/invoiceout/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -267,7 +289,7 @@
                                 '</table>' +
                                 '</div>',
                                 resolve: {
-                                    results: resolveResource('http://coolworld.herokuapp.com/api/users/get1')
+                                    results: resolveResource('api/users/get')
                                 },
                                 controller: 'UsersCtrl',
                                 controllerAs: 'usersCtrl'
@@ -275,9 +297,15 @@
                         }
                     });
 		
-            function resolveResource(url) {
+            function resolveResource(api) {
                 resolver.$inject = ['$http', '$q', '$rootScope'];
                 function resolver($http, $q, $rootScope) {
+					var url;
+					if ($rootScope.mode == 'Heroku') {
+						url = $rootScope.myConfig.heroku + api;
+					} else {
+						url = $rootScope.myConfig.local + api;
+					}
                     return $http.get(url)
                             .then(function (result) {
                                 $rootScope.loading = false;
@@ -314,14 +342,14 @@
                 vm.local = $rootScope.myConfig.local;
 
                 vm.options = [
-                    {name: 'Select server'},
-                    {name: 'Heroku'},
-                    {name: 'Local'}
+                    {name: 'Local'},
+                    {name: 'Heroku'}
                 ];
                 vm.selectedItem = vm.options[0];
 
                 vm.options1 = [
                     {name: 'Select table'},
+                    {name: 'Collection'},
                     {name: 'Clients'},
                     {name: 'Goods'},
                     {name: 'Users'},
@@ -335,19 +363,16 @@
 
             function updateChange(val) {
                 vm.name = val.name;
+				console.log(vm.name)
                 $rootScope.loading = true;
                 $rootScope.error = false;
                 switch (val.name) {
                     case 'Local':
-						var mode = 'OFF-LINE (LocalStorage)';
-						localStorage.setItem('warehouse_mode', JSON.stringify(mode));
-						$rootScope.mode = mode;
+						$rootScope.mode = 'Local';
                         $rootScope.loading = false;
                         break;
                     case 'Heroku':
-						var mode = 'ON-LINE (Heroku)';
-						localStorage.setItem('warehouse_mode', JSON.stringify(mode));
-						$rootScope.mode = mode;
+						$rootScope.mode = 'Heroku';
                         $rootScope.loading = false;
                         break;
                     case 'Select table':
@@ -355,6 +380,9 @@
                         $rootScope.loading = false;
                         $state.go('root');
                         break;
+                    case 'Collection':
+                        $state.go('root.collection');
+                        break;						
                     case 'Clients':
                         $state.go('root.clients');
                         break;
@@ -398,15 +426,12 @@
 			init();
 			
 			function init() {
-				vm.items = [];
-				if ($rootScope.mode == 'ON-LINE (Heroku)') {
-					vm.items = results;
-				} 				
-				
-				if ($rootScope.mode == 'OFF-LINE (LocalStorage)') {
-					getUsersOFF();
-				} 
-			}
+				vm.items = results;
+				vm.items.splice(10,10000);
+				vm.server = $rootScope.myConfig.local;
+				vm.collection = 'http://ui-collection.herokuapp.com/';
+				$rootScope.loading = false;				
+ 			}
 
 			function getUsersOFF() {
 				$rootScope.error = false;

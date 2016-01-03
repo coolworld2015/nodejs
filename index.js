@@ -12,7 +12,8 @@ app.get('/', function (req, res) {
     res.send('It is just API Server...');
 });
 
-app.use(express.static(__dirname + '/build'));
+app.use(express.static(__dirname + '/'));
+//app.use(express.static(__dirname + '/build'));
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');

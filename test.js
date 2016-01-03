@@ -14,7 +14,7 @@ var Test = {
 module.exports.Test = Test;
 
 function getAll(req, res) {
-	console.log(myJson);
+	console.log(myJson.length);
 	res.send(myJson);
 };
 
