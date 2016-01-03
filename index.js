@@ -12,10 +12,6 @@ app.get('/', function (req, res) {
     res.send('It is just API Server...');
 });
 
-app.get('/test', function(req, res) {
-	res.sendFile(__dirname + '/test.json');
-});
-
 app.use(express.static(__dirname + '/build'));
 
 app.use(function (req, res, next) {
@@ -24,6 +20,12 @@ app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
+
+//------------------------------------------------------------------------
+var Test = require('./test').Test;
+app.get('/api/test/get', Test.getAll); 
+app.get('/api/test/findId/:id', Test.findById);
+app.get('/api/test/findName/:name', Test.findByName);
 
 //------------------------------------------------------------------------
 var Clients = require('./clients').Clients;
