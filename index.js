@@ -12,6 +12,10 @@ app.get('/', function (req, res) {
     res.send('It is just API Server...');
 });
 
+app.get('/test', function(req, res) {
+	res.sendFile(__dirname + '/test.json');
+});
+
 app.use(express.static(__dirname + '/build'));
 
 app.use(function (req, res, next) {
