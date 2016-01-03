@@ -1,0 +1,307 @@
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.js"></script>
+
+<html ng-app="app">
+<div ui-view></div>
+
+<center>
+    <div ng-show="loading" style="font-size:25px;">&nbsp
+        Loading...
+    </div>
+    <div ng-show="error" style="font-size:25px;">
+        Something went wrong
+    </div>
+</center>
+</html>
+
+<script>
+    (function () {
+        angular
+			.module('app', ['ui.router']);
+
+        angular
+			.module('app')
+			.run(myConfig);
+
+        function myConfig($rootScope) {
+            $rootScope.myConfig = {
+                heroku: 'http://ui-collection.herokuapp.com/',
+                local: 'http://localhost:3000/'
+            }
+			var mode = localStorage.getItem('warehouse_mode');
+			mode = JSON.parse(mode);
+			//$rootScope.mode = mode;
+        }
+
+        angular
+			.module('app')
+			.config(routeConfig);
+				
+		routeConfig.$inject = ['$stateProvider', '$urlRouterProvider'];
+		
+        function routeConfig($stateProvider, $urlRouterProvider) {
+
+            $urlRouterProvider.otherwise('/root');
+            $stateProvider
+                    .state('root', {
+                        url: '/root',
+                        data: {
+                            requireLogin: true
+                        },
+                        views: {
+                            '': {
+                                template: '<div ui-view="main"></div>' +
+                                '<div ui-view="display"></div>'
+                            },
+                            'main@root': {
+                                template: '<center>' +
+                                '<hr>{{ ctx.name }}<hr>' +
+                                '<select ng-model="ctx.selectedItem"' +
+                                'ng-options="option.name for option in ctx.options"' +
+                                'ng-change="ctx.updateChange(ctx.selectedItem)">' +
+                                '</select>' +
+                                '<hr>' +
+                                '<select ng-model="ctx.selectedItem1"' +
+                                'ng-options="option.name for option in ctx.options1"' +
+                                'ng-change="ctx.updateChange(ctx.selectedItem1)">' +
+                                '</select><hr>' +
+
+                                '<div ng-show="ctx.loading" style="font-size:25px;">&nbsp' +
+                                'Loading...' +
+                                '</div>' +
+
+                                '<div ng-show="ctx.error" style="font-size:25px;">' +
+                                'Something went wrong' +
+                                '</div>',
+                                controller: 'mainCtrl',
+                                controllerAs: 'ctx'
+                            },
+                            'display@root': {
+                                template: ''
+                            }
+                        }
+                    })
+					
+                    .state('root.collection', {
+                        url: '/collection',
+                        views: {
+                            'display': {
+                                template: '<div><center>' +
+                                '<table border=1>' +
+                                '<tr ng-repeat="item in collectionCtrl.items">' +
+                                '<td><img ng-src={{collectionCtrl.server}}{{item.pic}} style="width:100px; height:80px;"></td>' +
+                                '<td>{{item.id}}</td>' +
+                                '<td>{{item.name}}</td>' +
+                                '<td>{{collectionCtrl.server}}{{item.pic}}</td>' +
+                                '</tr>' +
+                                '</table>' +
+                                '</div>',
+                                resolve: {
+                                    results: resolveResource('api/get')
+                                },
+                                controller: 'CollectionCtrl',
+                                controllerAs: 'collectionCtrl'
+                            }
+                        }
+                    })
+					
+                    .state('root.search', {
+                        url: '/search',
+                        views: {
+                            'display': {
+                                template: '<div><center>' +
+								'<form ng-submit="searchCtrl.searchSubmit()" novalidate name="searchCtrl.form">'+
+                                '<table border=0>' +
+								'<tr>' +
+								'<td>' +
+								'<input type="text" class="form-control input" required placeholder="Item name" name="name" ng-model="searchCtrl.name">' +
+								'<div ng-if="searchCtrl.form.$submitted">' +
+								'<div ng-show="searchCtrl.form.name.$error.required" style="color:red">Value required</div>' +
+								'</div>' +
+								'</td>' +
+								'</tr>' +
+                                '</table>' +
+								'<hr>' +
+								'<button type="submit" class="btn btn-primary button">Search</button>&nbsp' +
+                                '</form>' +
+                                '</div>',
+                                controller: 'SearchCtrl',
+                                controllerAs: 'searchCtrl'
+                            }
+                        }
+                    })
+					
+                    .state('root.search-results', {
+                        url: '/search-results?name',
+                        views: {
+                            'display': {
+                                template: '<div><center>' +
+                                '<table border=1>' +
+                                '<tr ng-repeat="item in collectionCtrl.items">' +
+                                '<td><img ng-src={{collectionCtrl.server}}{{item.pic}} style="width:100px; height:80px;"></td>' +
+                                '<td>{{item.id}}</td>' +
+                                '<td>{{item.name}}</td>' +
+                                '</tr>' +
+                                '</table>' +
+                                '</div>',
+								resolve: {
+									results: ['$http','$stateParams', function($http, $stateParams) {
+										var url = 'http://ui-collection.herokuapp.com/api/findName/';
+										return $http.get(url + $stateParams.name)
+										.then(function(data) {
+											return data.data;
+										});
+									}]
+                            },
+                                controller: 'CollectionCtrl',
+                                controllerAs: 'collectionCtrl'
+                        }
+						}
+                    })
+					
+            function resolveResource(api) {
+                resolver.$inject = ['$http', '$q', '$rootScope'];
+                function resolver($http, $q, $rootScope) {
+					var url;
+					if ($rootScope.mode == 'Heroku') {
+						url = $rootScope.myConfig.heroku + api;
+					} else {
+						url = $rootScope.myConfig.local + api;
+					}
+                    return $http.get(url)
+                            .then(function (result) {
+                                $rootScope.loading = false;
+                                return result.data;
+                            })
+                            .catch(function (reject) {
+                                $rootScope.loading = false;
+                                $rootScope.error = true;
+                                return $q.reject(reject);
+                            });
+                }
+                return resolver;
+            }
+
+        }
+
+        angular.module('app')
+			.controller('mainCtrl', mainCtrl);
+
+        mainCtrl.$inject = ['$rootScope', '$state'];
+        function mainCtrl($rootScope, $state) {
+            var vm = this;
+            angular.extend(vm, {
+                init: init,
+                updateChange: updateChange
+            });
+
+            init();
+
+            function init() {
+                vm.name = 'UI-Collection';
+                vm.heroku = $rootScope.myConfig.heroku;
+                vm.local = $rootScope.myConfig.local;
+
+                vm.options = [
+                    {name: 'Local'},
+                    {name: 'Heroku'}
+                ];
+                vm.selectedItem = vm.options[0];
+
+                vm.options1 = [
+                    {name: 'Select table'},
+                    {name: 'Collection'},
+					{name: 'Search'}		
+                ];
+                vm.selectedItem1 = vm.options1[0];
+            }
+
+            function updateChange(val) {
+                $rootScope.loading = true;
+                $rootScope.error = false;
+                switch (val.name) {
+                    case 'Local':
+						$rootScope.mode = 'Local';
+						vm.options1 = [
+							{name: 'Select table'},
+							{name: 'Collection'},
+							{name: 'Search'}
+						];
+						vm.selectedItem1 = vm.options1[0];
+						$state.go('root');
+                        $rootScope.loading = false;
+                        break;
+                    case 'Heroku':
+						$rootScope.mode = 'Heroku';
+						vm.options1 = [
+							{name: 'Select table'},
+							{name: 'Collection'},
+							{name: 'Search'}
+						];
+						vm.selectedItem1 = vm.options1[0];
+						$state.go('root');
+                        $rootScope.loading = false;
+                        break;
+                    case 'Select table':
+                        $rootScope.loading = false;
+                        $state.go('root');
+                        break;
+                    case 'Collection':
+                        $state.go('root.collection');
+                        break;	                    
+					case 'Search':
+                        $state.go('root.search');
+                        break;						
+                }
+            }
+        }
+
+        angular
+			.module('app')
+			.controller('CollectionCtrl', CollectionCtrl);
+				
+		CollectionCtrl.$inject = ['$state', 'results', '$rootScope'];
+		
+        function CollectionCtrl($state, results, $rootScope) {
+            var vm = this;
+			
+			angular.extend(vm, {
+            items: results,
+			init: init
+			});
+			
+			init();
+			
+			function init() {
+				vm.items = results;
+				vm.items.splice(10,10000);
+				vm.server = $rootScope.myConfig.heroku;
+				$rootScope.loading = false;				
+ 			}
+        }
+		
+        angular
+			.module('app')
+			.controller('SearchCtrl', SearchCtrl);
+				
+		SearchCtrl.$inject = ['$state', '$rootScope'];
+        
+		function SearchCtrl($state, $rootScope) {
+            var vm = this;
+			$rootScope.loading = false;
+			$rootScope.error = false;
+ 			
+			angular.extend(vm, {
+				searchSubmit: searchSubmit
+			});
+			
+			function searchSubmit() {
+				if (vm.form.$invalid) {
+					return;
+				}
+				$state.go('root.search-results', {name: vm.name});
+			}
+        }
+		
+    })();
+</script>
