@@ -1,10 +1,6 @@
 var fs = require("fs");
 var fileName = "./test.json";
 var myJson = require(fileName);
-	//myJson = JSON.stringify(myJson);
-	//myJson = JSON.parse(myJson);
-	//console.log(myJson);
-//fs.writeFile( "test.json", JSON.stringify(myJson), "utf8", function(){} );
  
 var Test = {
 	getAll: getAll,
@@ -48,9 +44,7 @@ function addItem(req, res) {
 		pic:req.body.pic,
 		name:req.body.name
 	}
-	console.log(myJson.length);
 	myJson.push(obj);
 	fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});
-	console.log(myJson.length);
-	res.send(myJson);
+	res.send('Ok');
 };
