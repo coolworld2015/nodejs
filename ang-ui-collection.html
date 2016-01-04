@@ -197,8 +197,9 @@
         angular.module('app')
 			.controller('mainCtrl', mainCtrl);
 
-        mainCtrl.$inject = ['$rootScope', '$state'];
-        function mainCtrl($rootScope, $state) {
+        mainCtrl.$inject = ['$scope', '$rootScope', '$state'];
+        function mainCtrl($scope, $rootScope, $state) {
+			$scope.$on('resetOptions', init);		
             var vm = this;
             angular.extend(vm, {
                 init: init,
@@ -303,6 +304,7 @@
                 $http.post(url, item)
                         .then(function (data) {
                             console.log(data);				
+							$rootScope.$broadcast('resetOptions');							
                             $state.go('root');
                         })
                         .catch(function (data) {
@@ -318,7 +320,8 @@
                 };
                 $http.post(url, item)
                         .then(function (data) {
-                            console.log(data);				
+                            console.log(data);		
+							$rootScope.$broadcast('resetOptions');								
                             $state.go('root');
                         })
                         .catch(function (data) {
@@ -338,6 +341,7 @@
                 $http.post(url, item)
                         .then(function (data) {
                             console.log(data);				
+							$rootScope.$broadcast('resetOptions');								
                             $state.go('root');
                         })
                         .catch(function (data) {
