@@ -95,6 +95,7 @@
                                 '<td>{{item.id}}</td>' +
                                 '<td>{{item.name}}</td>' +
                                 '<td>{{collectionCtrl.server}}{{item.pic}}</td>' +
+                                '<td ng-click="collectionCtrl.delItem(item)">X</td>' +
                                 '</tr>' +
                                 '</table>' +
                                 '</div>',
@@ -147,9 +148,14 @@
                                 '</table>' +
                                 '</div>',
 								resolve: {
-									results: ['$http','$stateParams', function($http, $stateParams) {
-										var url = 'http://ui-collection.herokuapp.com/api/findName/';
-										var url = 'http://localhost:3000/api/findName/';
+									results: ['$http','$stateParams','$rootScope', function($http, $stateParams, $rootScope) {
+										var api,url;
+										api = 'api/findName/';
+										if ($rootScope.mode == 'Heroku') {
+											url = $rootScope.myConfig.heroku + api;
+										} else {
+											url = $rootScope.myConfig.local + api;
+										}
 										return $http.get(url + $stateParams.name)
 										.then(function(data) {
 											return data.data;
@@ -271,6 +277,7 @@
 			angular.extend(vm, {
             items: results,
 			init: init,
+			delItem: delItem,
 			addItem: addItem
 			});
 			
@@ -283,6 +290,22 @@
 				$rootScope.loading = false;				
  			}
 			
+            function delItem(item) {
+                var url = $rootScope.myConfig.local + 'api/delete';
+
+                var item = {
+                    "id": item.id
+                };
+                $http.post(url, item)
+                        .then(function (data) {
+                            console.log(data);				
+                            $state.go('root');
+                        })
+                        .catch(function (data) {
+                            console.log('catch - ' + data.status);
+                        });
+            }
+			
             function addItem() {
                 var url = $rootScope.myConfig.local + 'api/add';
 
@@ -290,12 +313,12 @@
                 var item = {
                     "id": r,
                     "name": "item_" + r,
-					"pic": "pic_" + r
+					"pic": "Photo/misc/no_photo.gif"
                 };
                 $http.post(url, item)
                         .then(function (data) {
-                            console.log(data);
-                            $state.go('root.collection');
+                            console.log(data);				
+                            $state.go('root');
                         })
                         .catch(function (data) {
                             console.log('catch - ' + data.status);

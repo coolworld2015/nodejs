@@ -28,6 +28,7 @@ app.get('/api/get', Test.getAll);
 app.get('/api/findId/:id', Test.findById);
 app.get('/api/findName/:name', Test.findByName);
 app.post('/api/add', Test.addItem);
+app.post('/api/delete', Test.removeItem);
 
 //------------------------------------------------------------------------
 var Clients = require('./clients').Clients;

@@ -6,7 +6,8 @@ var Test = {
 	getAll: getAll,
     findById: findById,
 	findByName: findByName,
-	addItem: addItem
+	addItem: addItem,
+	removeItem: removeItem
 };
 
 module.exports.Test = Test;
@@ -46,5 +47,17 @@ function addItem(req, res) {
 	}
 	myJson.push(obj);
 	fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});
+	res.send('Ok');
+};
+
+function removeItem(req, res) {
+	var id = req.body.id;
+	for (var i = 0; i < myJson.length; i++) {
+		if (myJson[i].id.indexOf(id) > -1) {
+			myJson.splice(i,1);
+			fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});			
+			break;
+		}
+	}
 	res.send('Ok');
 };
