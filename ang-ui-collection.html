@@ -95,7 +95,8 @@
                                 '<td>{{item.id}}</td>' +
                                 '<td>{{item.name}}</td>' +
                                 '<td>{{collectionCtrl.server}}{{item.pic}}</td>' +
-                                '<td ng-click="collectionCtrl.delItem(item)">X</td>' +
+                                '<td ng-click="collectionCtrl.editItem(item)">Edit</td>' +
+                                '<td ng-click="collectionCtrl.delItem(item)">Delete</td>' +
                                 '</tr>' +
                                 '</table>' +
                                 '</div>',
@@ -277,6 +278,7 @@
 			angular.extend(vm, {
             items: results,
 			init: init,
+			editItem: editItem,
 			delItem: delItem,
 			addItem: addItem
 			});
@@ -289,6 +291,24 @@
 				vm.server = $rootScope.myConfig.heroku;
 				$rootScope.loading = false;				
  			}
+			
+            function editItem(item) {
+                var url = $rootScope.myConfig.local + 'api/update';
+
+                var item = {
+                    "id": item.id,
+					"name": item.name + '_Updated',
+					"pic": item.pic
+                };
+                $http.post(url, item)
+                        .then(function (data) {
+                            console.log(data);				
+                            $state.go('root');
+                        })
+                        .catch(function (data) {
+                            console.log('catch - ' + data.status);
+                        });
+            }
 			
             function delItem(item) {
                 var url = $rootScope.myConfig.local + 'api/delete';

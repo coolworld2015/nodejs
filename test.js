@@ -7,6 +7,7 @@ var Test = {
     findById: findById,
 	findByName: findByName,
 	addItem: addItem,
+	updateItem: updateItem,	
 	removeItem: removeItem
 };
 
@@ -50,10 +51,27 @@ function addItem(req, res) {
 	res.send('Ok');
 };
 
+function updateItem(req, res) {
+	var id = req.body.id;
+	var obj = {
+		id:req.body.id,
+		pic:req.body.pic,
+		name:req.body.name
+	}
+	for (var i = 0; i < myJson.length; i++) {
+		if (myJson[i].id == id) {
+			myJson.splice(i, 1, obj);
+			fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});			
+			break;
+		}
+	}
+	res.send('Ok');
+};
+
 function removeItem(req, res) {
 	var id = req.body.id;
 	for (var i = 0; i < myJson.length; i++) {
-		if (myJson[i].id.indexOf(id) > -1) {
+		if (myJson[i].id == id) {
 			myJson.splice(i,1);
 			fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});			
 			break;
