@@ -24,9 +24,10 @@ app.use(function (req, res, next) {
 
 //------------------------------------------------------------------------
 var Test = require('./test').Test;
-app.get('/api/test/get', Test.getAll); 
-app.get('/api/test/findId/:id', Test.findById);
-app.get('/api/test/findName/:name', Test.findByName);
+app.get('/api/get', Test.getAll); 
+app.get('/api/findId/:id', Test.findById);
+app.get('/api/findName/:name', Test.findByName);
+app.post('/api/add', Test.addItem);
 
 //------------------------------------------------------------------------
 var Clients = require('./clients').Clients;

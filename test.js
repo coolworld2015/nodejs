@@ -1,5 +1,6 @@
 var fs = require("fs");
-var myJson = require("./test.json");
+var fileName = "./test.json";
+var myJson = require(fileName);
 	//myJson = JSON.stringify(myJson);
 	//myJson = JSON.parse(myJson);
 	//console.log(myJson);
@@ -8,7 +9,8 @@ var myJson = require("./test.json");
 var Test = {
 	getAll: getAll,
     findById: findById,
-	findByName: findByName
+	findByName: findByName,
+	addItem: addItem
 };
 
 module.exports.Test = Test;
@@ -38,4 +40,17 @@ function findByName(req, res) {
 		}
 	}
 	return res.send(results);
+};
+
+function addItem(req, res) {
+	var obj = {
+		id:req.body.id,
+		pic:req.body.pic,
+		name:req.body.name
+	}
+	console.log(myJson.length);
+	myJson.push(obj);
+	fs.writeFile(fileName, JSON.stringify(myJson), "utf8", function(){});
+	console.log(myJson.length);
+	res.send(myJson);
 };

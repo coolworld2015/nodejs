@@ -87,6 +87,8 @@
                         views: {
                             'display': {
                                 template: '<div><center>' +
+								'<button ng-click="collectionCtrl.addItem()">Add Item</button>&nbsp' +
+								'<hr>' +
                                 '<table border=1>' +
                                 '<tr ng-repeat="item in collectionCtrl.items">' +
                                 '<td><img ng-src={{collectionCtrl.server}}{{item.pic}} style="width:100px; height:80px;"></td>' +
@@ -147,6 +149,7 @@
 								resolve: {
 									results: ['$http','$stateParams', function($http, $stateParams) {
 										var url = 'http://ui-collection.herokuapp.com/api/findName/';
+										var url = 'http://localhost:3000/api/findName/';
 										return $http.get(url + $stateParams.name)
 										.then(function(data) {
 											return data.data;
@@ -260,14 +263,15 @@
 			.module('app')
 			.controller('CollectionCtrl', CollectionCtrl);
 				
-		CollectionCtrl.$inject = ['$state', 'results', '$rootScope'];
+		CollectionCtrl.$inject = ['$state', 'results', '$rootScope', '$http'];
 		
-        function CollectionCtrl($state, results, $rootScope) {
+        function CollectionCtrl($state, results, $rootScope, $http) {
             var vm = this;
 			
 			angular.extend(vm, {
             items: results,
-			init: init
+			init: init,
+			addItem: addItem
 			});
 			
 			init();
@@ -278,6 +282,26 @@
 				vm.server = $rootScope.myConfig.heroku;
 				$rootScope.loading = false;				
  			}
+			
+            function addItem() {
+                var url = $rootScope.myConfig.local + 'api/add';
+
+                var r = (Math.random(1000000) * 100000).toFixed();
+                var item = {
+                    "id": r,
+                    "name": "item_" + r,
+					"pic": "pic_" + r
+                };
+                $http.post(url, item)
+                        .then(function (data) {
+                            console.log(data);
+                            $state.go('root.collection');
+                        })
+                        .catch(function (data) {
+                            console.log('catch - ' + data.status);
+                            console.log(data);
+                        });
+            }			
         }
 		
         angular
