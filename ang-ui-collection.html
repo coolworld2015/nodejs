@@ -5,10 +5,10 @@
 <div ui-view></div>
 
 <center>
-    <div ng-show="loading" style="font-size:25px;">&nbsp
+    <div ng-show="loading" style="font-size:25px; color:blue;">&nbsp
         Loading...
     </div>
-    <div ng-show="error" style="font-size:25px;">
+    <div ng-show="error" style="font-size:25px; color:red;">
         Something went wrong
     </div>
 </center>
@@ -28,9 +28,7 @@
                 heroku: 'http://ui-collection.herokuapp.com/',
                 local: 'http://localhost:3000/'
             }
-			var mode = localStorage.getItem('warehouse_mode');
-			mode = JSON.parse(mode);
-			//$rootScope.mode = mode;
+			$rootScope.mode = 'Heroku';
         }
 
         angular
@@ -140,11 +138,15 @@
                         views: {
                             'display': {
                                 template: '<div><center>' +
+								'<button ng-click="collectionCtrl.addItem()">Add Item</button>&nbsp' +
+								'<hr>' +								
                                 '<table border=1>' +
                                 '<tr ng-repeat="item in collectionCtrl.items">' +
                                 '<td><img ng-src={{collectionCtrl.server}}{{item.pic}} style="width:100px; height:80px;"></td>' +
                                 '<td>{{item.id}}</td>' +
                                 '<td>{{item.name}}</td>' +
+                                '<td ng-click="collectionCtrl.editItem(item)">Edit</td>' +
+                                '<td ng-click="collectionCtrl.delItem(item)">Delete</td>' +								
                                 '</tr>' +
                                 '</table>' +
                                 '</div>',
@@ -210,12 +212,10 @@
 
             function init() {
                 vm.name = 'UI-Collection';
-                vm.heroku = $rootScope.myConfig.heroku;
-                vm.local = $rootScope.myConfig.local;
 
                 vm.options = [
-                    {name: 'Local'},
-                    {name: 'Heroku'}
+                    {name: 'Heroku'},
+                    {name: 'Local'}
                 ];
                 vm.selectedItem = vm.options[0];
 
@@ -294,7 +294,13 @@
  			}
 			
             function editItem(item) {
-                var url = $rootScope.myConfig.local + 'api/update';
+				var url, api;
+				api = 'api/update';
+				if ($rootScope.mode == 'Heroku') {
+					url = $rootScope.myConfig.heroku + api;
+				} else {
+					url = $rootScope.myConfig.local + api;
+				}
 
                 var item = {
                     "id": item.id,
@@ -313,8 +319,14 @@
             }
 			
             function delItem(item) {
-                var url = $rootScope.myConfig.local + 'api/delete';
-
+				var url, api;
+				api = 'api/delete';
+				if ($rootScope.mode == 'Heroku') {
+					url = $rootScope.myConfig.heroku + api;
+				} else {
+					url = $rootScope.myConfig.local + api;
+				}
+ 
                 var item = {
                     "id": item.id
                 };
@@ -330,7 +342,13 @@
             }
 			
             function addItem() {
-                var url = $rootScope.myConfig.local + 'api/add';
+				var url, api;
+				api = 'api/add';
+				if ($rootScope.mode == 'Heroku') {
+					url = $rootScope.myConfig.heroku + api;
+				} else {
+					url = $rootScope.myConfig.local + api;
+				}			
 
                 var r = (Math.random(1000000) * 100000).toFixed();
                 var item = {
