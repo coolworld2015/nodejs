@@ -150,25 +150,26 @@
                                 '</tr>' +
                                 '</table>' +
                                 '</div>',
-								resolve: {
-									results: ['$http','$stateParams','$rootScope', function($http, $stateParams, $rootScope) {
-										var api,url;
-										api = 'api/findName/';
-										if ($rootScope.mode == 'Heroku') {
-											url = $rootScope.myConfig.heroku + api;
-										} else {
-											url = $rootScope.myConfig.local + api;
-										}
-										return $http.get(url + $stateParams.name)
-										.then(function(data) {
-											return data.data;
-										});
-									}]
-                            },
+
                                 controller: 'CollectionCtrl',
                                 controllerAs: 'collectionCtrl'
-                        }
-						}
+							}
+						},
+						resolve: {
+							results: ['$http','$stateParams','$rootScope', function($http, $stateParams, $rootScope) {
+								var api,url;
+								api = 'api/findName/';
+								if ($rootScope.mode == 'Heroku') {
+									url = $rootScope.myConfig.heroku + api;
+								} else {
+									url = $rootScope.myConfig.local + api;
+								}
+								return $http.get(url + $stateParams.name)
+								.then(function(data) {
+									return data.data;
+								});
+							}]
+					}
                     })
 					
             function resolveResource(api) {
