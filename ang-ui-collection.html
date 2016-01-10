@@ -38,7 +38,6 @@
 		routeConfig.$inject = ['$stateProvider', '$urlRouterProvider'];
 		
         function routeConfig($stateProvider, $urlRouterProvider) {
-
             $urlRouterProvider.otherwise('/root');
             $stateProvider
                     .state('root', {
@@ -166,9 +165,14 @@
 								return $http.get(url + $stateParams.name)
 								.then(function(data) {
 									return data.data;
+								})                            
+								.catch(function (reject) {
+									$rootScope.loading = false;
+									$rootScope.error = true;
+									return [];
 								});
 							}]
-					}
+						}
                     })
 					
             function resolveResource(api) {
@@ -193,7 +197,6 @@
                 }
                 return resolver;
             }
-
         }
 
         angular.module('app')
@@ -388,6 +391,8 @@
 				if (vm.form.$invalid) {
 					return;
 				}
+				$rootScope.loading = true;
+                $rootScope.error = false;
 				$state.go('root.search-results', {name: vm.name});
 			}
         }
