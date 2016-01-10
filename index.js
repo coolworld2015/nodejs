@@ -1,7 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
-app.use(bodyParser());
+app.use(bodyParser({limit: '50mb'}));
 
 app.listen(process.env.PORT || 3000, function () {
     console.log('Server is running on 3000');
